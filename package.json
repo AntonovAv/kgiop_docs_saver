@@ -1,0 +1,18 @@
+{
+  "name": "kgiop_docs_saver",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run": "node app/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.19.0",
+    "jsdom": "^15.2.1",
+    "node-xlsx": "^0.15.0"
+  }
+}
