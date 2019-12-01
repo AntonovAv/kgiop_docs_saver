@@ -1,37 +1,31 @@
-const axios = require('axios')
-const {JSDOM} = require("jsdom")
 const fs = require('fs')
 const xlsx = require('node-xlsx')
+const {getDocuments, uploadDocument} = require("./yandex");
 
-/*
-axios.get('https://kgiop.gov.spb.ru/zaklyucheniya-gosudarstvennyh-istoriko-kulturnyh-ekspertiz/zaklyucheniya-gosudarstvennyh-istoriko-kulturnyh-ekspertiz/')
-    .then(resp => {
-        const dom = new JSDOM(fs.readFileSync(__dirname + '/page.html'))
-        //fs.writeFileSync(__dirname + '/page.html', resp.data)
-        const rows = dom.window.document.querySelectorAll('div.page-content tr')
-        console.log(`Found ${rows.length} rows`)
-
-        const doc = []
-        rows.slice(1, 20).forEach(row => {
-            const cells = row.querySelectorAll('td')
-            const date = cells[0].textContent
-            const number = cells[1].textContent
-            const desciption = cells[2].textContent
-            const status = cells[3].textContent
-            const linkCell = cells[4]
-            const link = linkCell.querySelector('a')
-            if(!link) {
-                console.log(`Document N:${number} without link: ${linkCell.textContent}`)
-            } else {
-
-            }
+getDocuments()
+    .then((docs) => {
+        const promises = docs.filter(d => d.withUrl()).slice(0, 2).map((d) => {
+            return uploadDocument(d)
         })
-    })
-    .catch((err) => {
-        console.error(err)
-    })
-*/
+        promises.reduce(
+            (p, ) => p.then(
+                () => new Promise(
+                    (resolve) => {
+                        setTimeout(() => {
+                            resolve();
+                        }, 5000);
 
+                    }
+                )
+            ),
+            Promise.resolve()
+        );
+        return promises
+    })
+    .then(d => {
+        console.log(d.uploadedUrl)
+    })
+/*
 const dom = new JSDOM(fs.readFileSync(__dirname + '/../page.html'))
 //fs.writeFileSync(__dirname + '/page.html', resp.data)
 const rows = dom.window.document.querySelectorAll('div.page-content tr')
@@ -65,11 +59,12 @@ Array.prototype.slice.call(rows, 1, 20).forEach(row => {
     }
     doc.push(rowData)
 })
+*/
 
 
 // write document
-const options = {}
+/*const options = {}
 const buffer = xlsx.build([{name: `Results`, data: doc}], options)
 const wstream = fs.createWriteStream('res.xlsx')
 wstream.write(buffer)
-wstream.end()
+wstream.end()*/
