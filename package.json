@@ -13,6 +13,8 @@
   "dependencies": {
     "axios": "^0.19.0",
     "jsdom": "^15.2.1",
-    "node-xlsx": "^0.15.0"
+    "node-xlsx": "^0.15.0",
+    "promise-sequential": "^1.1.1",
+    "form-data": "latest"
   }
 }

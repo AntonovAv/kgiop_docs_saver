@@ -1,8 +1,9 @@
 class Document {
-    constructor(dateStr, docNum, description, statusText = "", url = null) {
+    constructor(dateStr, docNum, description, statusText = "", url = null, emptyUrlText = null) {
         this.dateStr = dateStr
         this.docNum = docNum
         this.description = description
+        this.emptyUrlText = emptyUrlText
         this._url = url;
         this._uploadedUrl = null
     }
@@ -17,11 +18,14 @@ class Document {
         const linkCell = cells[4]
         const link = linkCell.querySelector('a')
         let url = null
+        let emptyUrlText = null
         if (link) {
             url = link.getAttribute('href')
+        } else {
+            emptyUrlText = linkCell.textContent.trim()
         }
 
-        return new Document(dateStr, docNum, description, statusText, url)
+        return new Document(dateStr, docNum, description, statusText, url, emptyUrlText)
     }
 
 

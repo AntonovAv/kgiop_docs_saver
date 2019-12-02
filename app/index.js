@@ -1,70 +1,35 @@
 const fs = require('fs')
 const xlsx = require('node-xlsx')
-const {getDocuments, uploadDocument} = require("./yandex");
+const {getDocuments, downloadDocument, uploadResults} = require("./yandex")
+const sequential = require('promise-sequential')
+const {createTable, getTableName} = require('./tableUtils')
 
 getDocuments()
     .then((docs) => {
-        const promises = docs.filter(d => d.withUrl()).slice(0, 2).map((d) => {
-            return uploadDocument(d)
+        const promises = docs.filter(d => d.withUrl()).map((d) => {
+            return () => new Promise(resolve => {
+                setTimeout(() => {
+                    resolve(downloadDocument(d))
+                }, 500)
+            })
         })
-        promises.reduce(
-            (p, ) => p.then(
-                () => new Promise(
-                    (resolve) => {
-                        setTimeout(() => {
-                            resolve();
-                        }, 5000);
 
-                    }
-                )
-            ),
-            Promise.resolve()
-        );
-        return promises
+        return sequential(promises)
+            .then(() => {
+                return docs
+            })
     })
-    .then(d => {
-        console.log(d.uploadedUrl)
+    .then(docs => {
+        const data = createTable(docs)
+        const fileName = getTableName()
+        const buffer = xlsx.build([{name: `Results`, data}], {})
+        const wstream = fs.createWriteStream(fileName)
+        wstream.write(buffer)
+        wstream.end()
+        /*const wstream = fs.createReadStream()*/
+        return 'OK'/*uploadResults(fileName, buffer)*/
     })
-/*
-const dom = new JSDOM(fs.readFileSync(__dirname + '/../page.html'))
-//fs.writeFileSync(__dirname + '/page.html', resp.data)
-const rows = dom.window.document.querySelectorAll('div.page-content tr')
-console.log(`Found ${rows.length} rows`)
-
-const doc = []
-Array.prototype.slice.call(rows, 1, 20).forEach(row => {
-    const cells = row.querySelectorAll('td')
-    const rowData = []
-    rowData.push(cells[0].textContent.trim()) // date
-    const docNum = cells[1].textContent.trim()
-    rowData.push(docNum) // doc number
-    rowData.push(cells[2].textContent.trim()) //
-    rowData.push(cells[3].textContent.trim())
-
-    const linkCell = cells[4]
-    const link = linkCell.querySelector('a')
-    if (!link) {
-        console.log(`Document N:${docNum} without link: ${linkCell.textContent.trim()}`)
-        rowData.push(null)
-    } else {
-        const linkToFile = `https://kgiop.gov.spb.ru${link.getAttribute('href')}`
-        console.log(`Document N:${docNum} with link: ${linkToFile}`)
-        rowData.push({
-            v: linkToFile,
-            l: {
-                Target: linkToFile,
-                Tooltip: docNum,
-            }
-        })
-    }
-    doc.push(rowData)
-})
-*/
-
-
-// write document
-/*const options = {}
-const buffer = xlsx.build([{name: `Results`, data: doc}], options)
-const wstream = fs.createWriteStream('res.xlsx')
-wstream.write(buffer)
-wstream.end()*/
+    .then(() => {
+        console.log('OK')
+    })
+    .catch(console.error)
