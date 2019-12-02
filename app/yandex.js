@@ -53,19 +53,17 @@ function downloadDocument(document) {
         downloadFile(targetPath, `${params.uploadDocBasePath}${document.url}`)
             .then(() => {
                 document.upload(targetPath)
-                console.log(`Document ${document.docNum} downloaded`)
                 return document
             })
     )
 }
 
 function getDocuments() {
-    return axios.get(c.DOCS_PAGE_URL)
+    return axios.get(params.docListHtmlPageUrl)
         .then(resp => {
             const dom = new JSDOM(resp.data)
             const rows = dom.window.document.querySelectorAll('div.page-content tr')
-            console.log(`Found ${rows.length} rows`)
-
+            // skip first heading row
             return Array.prototype.slice.call(rows, 1).map(Document.fromHtmlRow)
         })
 }
