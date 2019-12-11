@@ -1,0 +1,9 @@
+{
+  "docListHtmlPageUrl": "https://kgiop.gov.spb.ru/zaklyucheniya-gosudarstvennyh-istoriko-kulturnyh-ekspertiz/gosudarstvennye-istoriko-kulturnye-ekspertizy-za-2017-g/",
+  "authToken": "",
+  "uploadDocBasePath": "https://kgiop.gov.spb.ru",
+  "targetDirPath": "/kgiop_docs/2019",
+  "approvedDocsTargetDir": "/Мониторинг/КГИОП документы/утвержденные документы/2019",
+  "targetResultFilePath": "/kgiop_docs/2019",
+  "resultFileNamePrefix": "Results2019"
+}

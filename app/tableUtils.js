@@ -10,7 +10,7 @@ function createTable(docs) {
 
         if (d.withUrl()) {
             rowData.push(d.uploadedUrl)
-            const link = params.uploadDocBasePath + `/${d.url}`
+            const link = params.uploadDocBasePath + `${d.url}`
             rowData.push({
                 v: link,
                 l: {
@@ -26,12 +26,30 @@ function createTable(docs) {
     })
 }
 
-function getTableName() {
+function getTableName(prefix = params.resultFileNamePrefix) {
     const date = new Date()
-    return `${params.resultFileNamePrefix}_${date.getDay()}_${date.getMonth()}_${date.getFullYear()}.xlsx`
+    return `${prefix}_${date.getDay()}_${date.getMonth()}_${date.getFullYear()}.xlsx`
+}
+
+function createApprovedDocsTable(approvedDocs) {
+    return approvedDocs.map(d => {
+        const rowData = []
+        const link = params.uploadDocBasePath + `${d.url}`
+        rowData.push(link)
+        rowData.push(d.title)
+        rowData.push(d.dateFrom || ' ')
+        if (d.uploadedUrl !== null) {
+            rowData.push(d.uploadedUrl)
+        } else {
+            rowData.push(d.error)
+        }
+
+        return rowData
+    })
 }
 
 module.exports = {
     createTable,
+    createApprovedDocsTable,
     getTableName,
 }

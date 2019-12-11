@@ -1,9 +1,9 @@
 const c = require('./constants')
 const axios = require('axios')
-const {JSDOM} = require('jsdom')
-const Document = require('./Document')
 const params = require('./params')
 const FormData = require('form-data')
+
+const MAX_FILE_NAME_LENGTH = 255
 
 function downloadFile(targetUrl, uploadUrl) {
     return (axios.post(
@@ -58,14 +58,26 @@ function downloadDocument(document) {
     )
 }
 
-function getDocuments() {
-    return axios.get(params.docListHtmlPageUrl)
-        .then(resp => {
-            const dom = new JSDOM(resp.data)
-            const rows = dom.window.document.querySelectorAll('div.page-content tr')
-            // skip first heading row
-            return Array.prototype.slice.call(rows, 1).map(Document.fromHtmlRow)
-        })
+function downloadApprovedDocument(approvedDocument) {
+    const fileName = approvedDocument.title
+        .replace(/\//g, '_')
+        .replace(/:/g, ' ')
+        .substring(0, MAX_FILE_NAME_LENGTH - 4)
+    const targetPath = params.approvedDocsTargetDir + `/${fileName}.pdf`
+    return Promise.resolve(
+        downloadFile(targetPath, `${params.uploadDocBasePath}${approvedDocument.url}`)
+            .then(() => {
+                approvedDocument.upload(targetPath)
+                return approvedDocument
+            })
+            .catch(error => {
+                const response = error.response
+                if(response.status === 400) {
+                    approvedDocument.failedUpload(JSON.stringify(response.data))
+                }
+                throw error
+            })
+    )
 }
 
 function uploadResults(fileName, fileData) {
@@ -98,6 +110,6 @@ function uploadResults(fileName, fileData) {
 
 module.exports = {
     downloadDocument,
-    getDocuments,
+    downloadApprovedDocument,
     uploadResults,
 }
